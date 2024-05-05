@@ -99,7 +99,6 @@ export const createConversationAsync = async (userId, language, difficulty, loca
 };
 
 // Messages
-
 export const createMessageAsync = async (message, images) => {
   try {
     const newMessage = {
@@ -139,23 +138,6 @@ export const getConversationsQueryByUser = (userId) => {
 };
 
 // helper functions
-
-const uploadFiles = async (files, location) => {
-  let filesUrls = [];
-  for (const item of files) {
-    const storageRef = ref(storage, `${location}${item.filename}`);
-    const uploadTask = await uploadBytes(storageRef, item.file);
-    const downloadURL = await getDownloadURL(uploadTask.ref);
-
-    filesUrls.push({
-      origin: item.origin,
-      filename: item.filename,
-      url: downloadURL,
-    });
-  }
-  return filesUrls;
-};
-
 export const getSnapshotData = (snapshot) => {
   if (!snapshot.exists) return undefined;
   const data = snapshot.data();
