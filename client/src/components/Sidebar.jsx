@@ -6,8 +6,9 @@ import ChatCreator from "./ChatCreator";
 import { logoutAsync } from "../services/authServices";
 import { Context } from "../context/Context";
 import { signOut } from "../context/Actions";
-import { createConversationAsync, getConversationsQueryByUser, getSnapshotData } from "../services/chatServices";
+import { createConversationAsync, createMessageAsync, getConversationsQueryByUser, getSnapshotData } from "../services/chatServices";
 import { onSnapshot } from "firebase/firestore";
+import { getFirstMessage } from "../services/aiServices";
 
 export default function Sidebar({ }) {
   const {auth, dispatch, chats, currentChat} = useContext(Context);
@@ -22,13 +23,9 @@ export default function Sidebar({ }) {
     loadConversations();
   }, [auth]);
 
-  console.log(conversations);
-
   const loadConversations = () => {
     if (auth == null) return;
     const query = getConversationsQueryByUser(auth.id);
-
-    console.log("query", query);
 
     onSnapshot(query, (snapshots) => {
       const tmpConversations = [];
@@ -56,7 +53,22 @@ export default function Sidebar({ }) {
       localStorage.setItem("convId", JSON.stringify(conv.id));
       setNewChat(false);
     } else {
-      const res = await createConversationAsync(auth.id, language, difficulty, location)
+      const res = await createConversationAsync(auth.id, language, difficulty, location);
+
+      // generate AI first message
+      const message = await getFirstMessage({ language, difficulty, location });
+
+      const msg = {
+        conversationId: res.id,
+        sender: "ai",
+        message
+      };
+
+      await createMessageAsync(msg);
+
+      console.log("first msg", message);
+      dispatch({ type: "SET_CURRENT_CHAT", payload: res });
+      localStorage.setItem("convId", JSON.stringify(res.id));
       if (res) {
         localStorage.setItem("convId", JSON.stringify(res.id));
         setNewChat(false);
@@ -75,7 +87,6 @@ export default function Sidebar({ }) {
     dispatch(signOut());
   };
 
-  console.log(currentChat);
 
   return (
     <div className="sidebar">

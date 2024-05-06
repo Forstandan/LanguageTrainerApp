@@ -1,4 +1,3 @@
-import { getDownloadURL, uploadBytes, ref } from "firebase/storage";
 import { auth, firestore as db, storage } from "../config/firebase";
 import {
   collection,
@@ -14,6 +13,7 @@ import {
   where,
   query,
   orderBy,
+  limit 
 } from "firebase/firestore";
 
 // create user
@@ -69,7 +69,6 @@ export const getUserAsync = async (id) => {
 // conversations (need to modify)
 export const createConversationAsync = async (userId, language, difficulty, location) => {
   try {
-    console.log(userId);
     const conv = {
       uid: userId,
       language: language,
@@ -78,7 +77,6 @@ export const createConversationAsync = async (userId, language, difficulty, loca
       last: { message: "", createdAt: null },
       createdAt: serverTimestamp(),
     };
-    console.log("conversation", conv);
     const convDoc = await addDoc(collection(db, "conversations"), conv);
     let result = null;
     const convId = convDoc.id;  
@@ -100,6 +98,8 @@ export const createConversationAsync = async (userId, language, difficulty, loca
 
 // Messages
 export const createMessageAsync = async (message) => {
+  console.log("message", message);
+
   try {
     const newMessage = {
       ...message,
@@ -111,8 +111,10 @@ export const createMessageAsync = async (message) => {
     if (messageId) {
       const msg_res = await getDoc(msgDoc);
       const msg = getSnapshotData(msg_res);
+      console.log("convId", msg.conversationId);
       // update conversation last message
       const convDoc = doc(db, "conversations", msg.conversationId);
+      console.log("msg.message", msg.message);
       await updateDoc(convDoc, {
         last: { message: msg.message, createdAt: msg.createdAt },
       });
@@ -127,6 +129,15 @@ export const getMsgQueryByConversationId = (convId) => {
   return query(
     collection(db, "messages"),
     where("conversationId", "==", convId),
+  );
+};
+
+export const getContextByConversationId = (convId) => {
+  return query(
+    collection(db, "messages"),
+    where("conversationId", "==", convId),
+    orderBy("createdAt", "desc"), // Order messages by createdAt field in descending order
+    limit(10) // Limit the results to the last 10 messages
   );
 };
 

@@ -5,17 +5,32 @@ from gemni_api import *
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 
-@app.route('api/get_response', methods=['POST'])
+@app.route('/api/get__first', methods=['POST'])
 def create_chat():
     language = request.json.get('language')
     difficulty = request.json.get('difficulty')
     location = request.json.get('location')
 
-    prompt = ("Please to the best of your ability speak to me in {} in the CEFR difficulty of {}. "
+    prompt = ("Act as a person at a/an {}. Please to the best of your ability speak to me in {} in the CEFR difficulty of {}. "
             "DO NOT TRANSLATE THE FOLLOWING TEXT: "
-            "(If I make a mistake, correct me by rephrasing my sentence in a correct manner. "
-            "Begin speaking to me as if we were at a/an {})").format(language, difficulty, location)    
+            "If I make a mistake, correct me by rephrasing my sentence in a correct manner. ").format(location, language, difficulty)    
     
+    print(prompt)
+
+    if not prompt:
+        return jsonify({'error': 'No prompt provided'}), 400
+    
+    try:
+        result = getResponse(prompt)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/get__response', methods=['POST'])
+def get_response():
+    prompt = request.json.get('prompt')
+    print(prompt)
+
     if not prompt:
         return jsonify({'error': 'No prompt provided'}), 400
     

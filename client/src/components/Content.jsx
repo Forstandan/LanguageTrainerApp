@@ -4,14 +4,22 @@ import Message from "./Message";
 import ChatHeaderObject from "./ChatHeaderObject";
 import BlankContent from "./BlankContent";
 import { Context } from "../context/Context";
-import { createMessageAsync, getMsgQueryByConversationId, getSnapshotData } from "../services/chatServices";
+import { createMessageAsync, getContextByConversationId, getMsgQueryByConversationId, getSnapshotData } from "../services/chatServices";
 import { onSnapshot } from "firebase/firestore";
+import { getResponse } from "../services/aiServices";
 
 export default function Content({ chat, setChat }) {
   const { currentChat, auth } = useContext(Context);
   const [onMenu, setOnMenu] = useState(false);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState([]);
+
+  function scrollMessagesToBottom() {
+    const messagesWrapper = document.querySelector('.messages-wrapper');
+    if (messagesWrapper) {
+      messagesWrapper.scrollTop = messagesWrapper.scrollHeight;
+    }  
+  }
 
   useEffect(() => {
     if (currentChat == null) return;
@@ -47,14 +55,60 @@ export default function Content({ chat, setChat }) {
       const res = await createMessageAsync(msg);
 
       if (res) {
+        scrollMessagesToBottom(); 
         setMessage("");
       }
+
+      let prevMessages = ""; 
+      const query = getContextByConversationId(currentChat.id);
+      const maxCharacters = 10000; // Maximum number of characters for prevMessages
+
+      // Create a promise to await the first snapshot
+      const snapshotPromise = new Promise((resolve, reject) => {
+        const unsubscribe = onSnapshot(query, snapshots => {
+          snapshots.forEach(snapshot => {
+            const messageData = getSnapshotData(snapshot);
+            if (messageData) {
+              console.log("messages", messageData.message);
+              // Check if adding the message will exceed the character limit
+              if (prevMessages.length + messageData.message.length <= maxCharacters) {
+                prevMessages += messageData.message + " "; 
+              } else {
+                // Truncate the message to fit within the character limit
+                const remainingCharacters = maxCharacters - prevMessages.length;
+                prevMessages += messageData.message.substring(0, remainingCharacters) + " ";
+                // No need to process more messages if we've reached the character limit
+                unsubscribe();
+              }
+            }
+          });
+          resolve(); // Resolve the promise after processing the first snapshot
+        });
+      });
+
+      // Wait for the promise to resolve
+      await snapshotPromise;
+
+      // Now you can safely use prevMessages
+      console.log("prev messages", prevMessages);
+
+      const response = await getResponse(prevMessages + message);
+
+      const responseMsg = {
+        conversationId: currentChat.id,
+        sender: "ai",
+        message: response
+      };
+
+      await createMessageAsync(responseMsg);
+
+      scrollMessagesToBottom();
+
+      console.log("response", response);
     } catch (error) {
       console.log(error);
     }
   };
-
-  console.log(messages);
 
   return (
     <div className={currentChat ? "content active" : "content"}>
