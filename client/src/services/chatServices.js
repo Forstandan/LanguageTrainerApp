@@ -99,7 +99,7 @@ export const createConversationAsync = async (userId, language, difficulty, loca
 };
 
 // Messages
-export const createMessageAsync = async (message, images) => {
+export const createMessageAsync = async (message) => {
   try {
     const newMessage = {
       ...message,

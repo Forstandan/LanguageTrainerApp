@@ -9,7 +9,7 @@ import { signOut } from "../context/Actions";
 import { createConversationAsync, getConversationsQueryByUser, getSnapshotData } from "../services/chatServices";
 import { onSnapshot } from "firebase/firestore";
 
-export default function Sidebar({ setChat }) {
+export default function Sidebar({ }) {
   const {auth, dispatch, chats, currentChat} = useContext(Context);
   const [newChat, setNewChat] = useState(false);
   const [conversations, setConversations] = useState([]);
