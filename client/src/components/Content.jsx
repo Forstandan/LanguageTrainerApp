@@ -4,12 +4,12 @@ import Message from "./Message";
 import ChatHeaderObject from "./ChatHeaderObject";
 import BlankContent from "./BlankContent";
 import { Context } from "../context/Context";
-import { createMessageAsync, getContextByConversationId, getMsgQueryByConversationId, getSnapshotData } from "../services/chatServices";
+import { createMessageAsync, deleteConversationAsync, getContextByConversationId, getMsgQueryByConversationId, getSnapshotData } from "../services/chatServices";
 import { onSnapshot } from "firebase/firestore";
 import { getResponse } from "../services/aiServices";
 
-export default function Content({ chat, setChat }) {
-  const { currentChat, auth } = useContext(Context);
+export default function Content() {
+  const { currentChat, auth, dispatch } = useContext(Context);
   const [onMenu, setOnMenu] = useState(false);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState([]);
@@ -87,7 +87,7 @@ export default function Content({ chat, setChat }) {
       });
 
       // Wait for the promise to resolve
-      await snapshotPromise;
+      await snapshotPromise; 
 
       // Now you can safely use prevMessages
       console.log("prev messages", prevMessages);
@@ -110,6 +110,16 @@ export default function Content({ chat, setChat }) {
     }
   };
 
+  const handleDeleteConversation = async(conversationId) => {
+    handleCloseChat()
+    await deleteConversationAsync(conversationId);
+  } 
+
+  const handleCloseChat = () => {
+    dispatch({ type: "SET_CURRENT_CHAT", payload: null });
+    localStorage.setItem("convId", null);
+  };
+
   return (
     <div className={currentChat ? "content active" : "content"}>
       {currentChat ?
@@ -120,11 +130,13 @@ export default function Content({ chat, setChat }) {
               <i className="fa-solid fa-ellipsis"></i>
               {onMenu && (
                 <div className="menu-wrapper">
-                  <span className="menu-item" onClick={() => setChat(false)}>
+                  <span className="menu-item" onClick={() => handleCloseChat()}>
                     Close Chat
                   </span>
-                  <span className="menu-item">Delete Messages</span>
-                  <span className="menu-item">Delete Chat</span>
+                  {/* <span className="menu-item">Delete Messages</span> */}
+                  <span className="menu-item" onClick={() => handleDeleteConversation(currentChat.id)}>
+                    Delete Chat
+                  </span>
                 </div>
               )}
             </div>

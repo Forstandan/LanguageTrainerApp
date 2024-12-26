@@ -10,7 +10,7 @@ import { createConversationAsync, createMessageAsync, getConversationsQueryByUse
 import { onSnapshot } from "firebase/firestore";
 import { getFirstMessage } from "../services/aiServices";
 
-export default function Sidebar({ }) {
+export default function Sidebar() {
   const {auth, dispatch, chats, currentChat} = useContext(Context);
   const [newChat, setNewChat] = useState(false);
   const [conversations, setConversations] = useState([]);

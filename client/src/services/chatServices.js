@@ -41,6 +41,17 @@ export const deleteUserAsync = async (id) => {
   }
 };
 
+// delete conversation
+export const deleteConversationAsync = async (convId) => {
+  try {
+    const userDoc = doc(db, "conversations", convId)
+    const res = await deleteDoc(userDoc);
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 // get all users
 export const getUsersAsync = async (user) => {
   if (!user) return;

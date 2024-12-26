@@ -9,7 +9,7 @@ export default function Chat() {
   return (
     <div className="chat">
         <Sidebar setChat={setChat}/>
-        <Content chat={chat} setChat={setChat}/>
+        <Content/>
     </div>
   )
 }
