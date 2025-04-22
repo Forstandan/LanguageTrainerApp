@@ -5,7 +5,7 @@ import requests
 load_dotenv()
 
 api_key = os.getenv('GOOGLE_API_KEY')
-url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
+url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 headers = {'Content-Type': 'application/json'}
 params = {'key': api_key}
@@ -13,7 +13,7 @@ params = {'key': api_key}
 def getResponse(query):
     data = {"contents":[{"parts":[{"text":query}]}]}
 
-    try:
+    try: 
         response = requests.post(url, headers=headers, params=params, json=data)
         response.raise_for_status()  # Raise an exception for HTTP errors
 
