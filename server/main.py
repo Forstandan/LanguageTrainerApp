@@ -12,9 +12,7 @@ def create_chat():
     location = request.json.get('location')
  
     prompt = ("Imagine we are having a conversation about something. Begin the conversation with a few sentences for me to respond to." 
-              "Act as a person at a/an {}. Please to the best of your ability speak to me in {} in the CEFR difficulty of {}. "
-              "DO NOT TRANSLATE THE FOLLOWING TEXT: "
-              "If I make a mistake, correct me by rephrasing my sentence in a correct manner. ").format(location, language, difficulty)    
+              "Act as a person at a/an {}. Please to the best of your ability speak to me in {} in the CEFR difficulty of {}. ").format(location, language, difficulty)    
     
     print(prompt)
 
