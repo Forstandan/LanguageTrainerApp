@@ -11,8 +11,7 @@ def create_chat():
     difficulty = request.json.get('difficulty')
     location = request.json.get('location')
  
-    prompt = ("Imagine we are having a conversation about something. Begin the conversation with a few sentences for me to respond to." 
-              "Act as a person at a/an {}. Please to the best of your ability speak to me in {} in the CEFR difficulty of {}. ").format(location, language, difficulty)    
+    prompt = ("Act as a person at a/an {}. Please to the best of your ability speak to me in {} in the CEFR difficulty of {}. ").format(location, language, difficulty)    
     
     print(prompt)
 
